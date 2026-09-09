@@ -35,13 +35,14 @@
   *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
   html{ -webkit-font-smoothing:antialiased; }
   body{ min-height:100vh; font-family:var(--font); font-size:var(--text-base); line-height:1.4; background:var(--bg); color:var(--text); }
-  button,input,select{ font:inherit; color:inherit; }
+  button,input,select,textarea{ font:inherit; color:inherit; }
   button{ border:0; cursor:pointer; }
-  input,select{ width:100%; border:1px solid var(--border); background:var(--surface); border-radius:var(--radius); padding:.55rem .7rem; outline:none; }
-  input:focus,select:focus,button:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
-  .shell{ max-width:1280px; margin:0 auto; padding:var(--s4) var(--s5); display:grid; gap:var(--s4); }
+  input,select,textarea{ width:100%; border:1px solid var(--border); background:var(--surface); border-radius:var(--radius); padding:.55rem .7rem; outline:none; }
+  textarea{ min-height:64px; resize:vertical; }
+  input:focus,select:focus,textarea:focus,button:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+  .shell{ max-width:1360px; margin:0 auto; padding:1.25rem 1.5rem 2rem; display:grid; gap:1.25rem; }
   .topbar{ display:flex; justify-content:space-between; align-items:center; gap:var(--s3); flex-wrap:wrap;
-    padding:var(--s3) var(--s4); background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow); position:sticky; top:.5rem; z-index:20; }
+    padding:.85rem 1.1rem; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow); position:sticky; top:.5rem; z-index:20; }
   .brand{ display:flex; align-items:center; gap:var(--s3); }
   .brand-mark{ width:2.1rem; height:2.1rem; padding:.3rem; border-radius:.6rem; background:var(--primary-soft); color:var(--primary); }
   .brand h1{ font-size:1.25rem; letter-spacing:-0.02em; line-height:1.1; }
@@ -57,67 +58,73 @@
   .sync-status.ok .sync-dot, .sync-status.flash .sync-dot{ background:var(--green); }
   .sync-status.failed .sync-dot{ background:var(--pink); }
   .sync-status.offline .sync-dot{ background:var(--warn); }
-  .sync-banner{ padding:.75rem 1rem; background:var(--brass-soft); border:1px solid var(--border); border-radius:var(--radius-lg); color:var(--text); font-size:var(--text-sm); }
+  .sync-banner{ padding:.85rem 1.1rem; background:var(--brass-soft); border:1px solid var(--border); border-radius:var(--radius-lg); color:var(--text); font-size:var(--text-sm); }
   .sync-banner strong{ color:var(--brass); }
-  .sync-banner .fine{ margin-top:.2rem; }
+  .sync-banner .fine{ margin-top:.25rem; color:var(--faint); font-size:var(--text-xs); }
 
-  .operate{ display:grid; grid-template-columns:minmax(320px,0.95fr) minmax(0,1.35fr); gap:var(--s4); align-items:start; }
-  .hero{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow); padding:var(--s5); display:grid; grid-template-columns:auto 1fr; gap:var(--s5); align-items:center; min-height:100%; }
-  .lower{ display:grid; grid-template-columns:1.4fr 0.8fr; gap:var(--s4); align-items:start; }
-  .ring-wrap{ position:relative; width:148px; height:148px; flex:0 0 auto; }
-  .ring-wrap svg{ width:148px; height:148px; transform:rotate(-90deg); }
-  .ring-bg{ fill:none; stroke:var(--divider); stroke-width:10; }
-  .ring-fg{ fill:none; stroke:var(--primary); stroke-width:10; stroke-linecap:round; transition:stroke-dashoffset .35s ease; }
+  .board{ display:grid; grid-template-columns:340px minmax(0,1.15fr) minmax(0,1.05fr); gap:1.25rem; align-items:stretch; }
+  .score{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow); padding:1.5rem 1.35rem; display:grid; gap:1.15rem; align-content:start; }
+  .ring-wrap{ position:relative; width:168px; height:168px; margin:0 auto; }
+  .ring-wrap svg{ width:168px; height:168px; transform:rotate(-90deg); }
+  .ring-bg{ fill:none; stroke:var(--divider); stroke-width:11; }
+  .ring-fg{ fill:none; stroke:var(--primary); stroke-width:11; stroke-linecap:round; transition:stroke-dashoffset .35s ease; }
   .ring-fg.miss{ stroke:var(--late); }
   .ring-fg.warn{ stroke:var(--warn); }
   .ring-fg.hit{ stroke:var(--green); }
   .ring-center{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; }
-  .ring-pct{ font-size:2.4rem; font-weight:800; font-variant-numeric:tabular-nums; line-height:1; }
-  .ring-sub{ font-size:var(--text-xs); color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-top:.2rem; }
-  .hero-copy h2{ font-size:1.35rem; letter-spacing:-0.02em; margin-bottom:.35rem; }
-  .hero-copy .coach{ font-size:var(--text-base); font-weight:600; }
-  .hero-copy .meta{ margin-top:.45rem; font-size:var(--text-sm); color:var(--muted); }
-  .pillars{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--s2); margin-top:var(--s4); }
-  .pillar{ border:1px solid var(--divider); border-radius:var(--radius); background:var(--surface-2); padding:.7rem .65rem; text-align:center; }
-  .pillar .k{ font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
-  .pillar .v{ font-size:1.35rem; font-weight:800; font-variant-numeric:tabular-nums; margin-top:.15rem; }
+  .ring-pct{ font-size:2.6rem; font-weight:800; font-variant-numeric:tabular-nums; line-height:1; }
+  .ring-sub{ font-size:var(--text-xs); color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-top:.25rem; }
+  .score-copy{ text-align:center; display:grid; gap:.4rem; }
+  .score-copy h2{ font-size:1.75rem; letter-spacing:-0.02em; }
+  .score-copy .coach{ font-size:var(--text-base); font-weight:600; }
+  .score-copy .meta{ font-size:var(--text-sm); color:var(--muted); }
+  .pillars{ display:grid; grid-template-columns:1fr 1fr; gap:.7rem; }
+  .pillar{ border:1px solid var(--divider); border-radius:var(--radius); background:var(--surface-2); padding:.95rem .8rem; text-align:center; min-height:78px; display:grid; align-content:center; gap:.2rem; }
+  .pillar .k{ font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+  .pillar .v{ font-size:1.45rem; font-weight:800; font-variant-numeric:tabular-nums; }
   .pillar.health .v{ color:var(--primary); }
   .pillar.discipline .v{ color:var(--brass); }
   .pillar.mental .v{ color:var(--blue); }
   .pillar.physical .v{ color:var(--green); }
 
-  .panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow); padding:var(--s4); }
-  .panel-head{ display:flex; justify-content:space-between; align-items:center; gap:var(--s3); margin-bottom:var(--s3); flex-wrap:wrap; }
+  .panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow); padding:1.15rem 1.2rem; display:grid; gap:.85rem; align-content:start; min-width:0; }
+  .panel-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:var(--s3); }
   .panel-head h2{ font-size:var(--text-lg); letter-spacing:-0.01em; }
   .muted{ color:var(--muted); font-size:var(--text-sm); }
   .fine{ color:var(--faint); font-size:var(--text-xs); }
 
-  .nn-list{ display:grid; gap:var(--s2); }
-  .nn{ border:1px solid var(--divider); border-radius:var(--radius-lg); background:var(--surface-2); padding:.85rem; display:grid; gap:.55rem; transition:border-color .15s ease, background .15s ease; }
-  .nn.late{ border-color:var(--late); background:var(--late-soft); }
-  .nn.done{ border-color:var(--green); background:var(--green-soft); }
-  .nn-row{ display:flex; align-items:center; gap:var(--s3); }
-  .check{ width:48px; height:48px; border-radius:12px; border:2px solid var(--border); background:var(--surface); color:transparent; font-size:1.35rem; font-weight:800; flex:0 0 auto; display:flex; align-items:center; justify-content:center; }
+  .item-list{ display:grid; gap:.65rem; }
+  .item{ border:1px solid var(--divider); border-radius:var(--radius-lg); background:var(--surface-2); padding:.9rem; display:grid; gap:.55rem; }
+  .item.late{ border-color:var(--late); background:var(--late-soft); }
+  .item.done{ border-color:var(--green); background:var(--green-soft); }
+  .item-row{ display:flex; align-items:flex-start; gap:.75rem; }
+  .check{ width:46px; height:46px; border-radius:12px; border:2px solid var(--border); background:var(--surface); color:transparent; font-size:1.3rem; font-weight:800; flex:0 0 auto; display:flex; align-items:center; justify-content:center; }
   .check.on{ background:var(--green); border-color:var(--green); color:#fff; }
-  .nn-body{ flex:1; min-width:0; display:grid; gap:.15rem; }
-  .nn-name{ font-size:1.05rem; font-weight:700; overflow-wrap:anywhere; }
-  .nn-name.done{ text-decoration:line-through; color:var(--faint); }
-  .nn-meta{ font-size:var(--text-xs); color:var(--muted); font-weight:600; display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
+  .item-body{ flex:1; min-width:0; display:grid; gap:.2rem; }
+  .item-name{ font-size:1.05rem; font-weight:700; overflow-wrap:anywhere; }
+  .item-name.done{ text-decoration:line-through; color:var(--faint); }
+  .item-meta{ font-size:var(--text-xs); color:var(--muted); font-weight:600; display:flex; gap:.45rem; flex-wrap:wrap; align-items:center; }
   .chip{ display:inline-flex; padding:.15rem .45rem; border-radius:999px; background:var(--surface); font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
   .chip.health{ background:var(--primary-soft); color:var(--primary); }
   .chip.discipline{ background:var(--brass-soft); color:var(--brass); }
   .chip.mental{ background:var(--blue-soft); color:var(--blue); }
   .chip.physical{ background:var(--green-soft); color:var(--green); }
   .chip.late{ background:var(--late-soft); color:var(--late); }
-  .edit-row{ display:none; grid-template-columns:1fr auto auto auto; gap:var(--s2); align-items:center; }
-  .nn.editing .edit-row{ display:grid; }
-  .nn.editing .nn-body .nn-name{ display:none; }
+  .notes-line{ font-size:var(--text-sm); color:var(--muted); overflow-wrap:anywhere; }
+  .edit-grid{ display:none; grid-template-columns:1fr 1fr; gap:.55rem; }
+  .edit-grid.full{ grid-template-columns:1fr; }
+  .item.editing .edit-grid{ display:grid; }
+  .item.editing .view-only{ display:none; }
+  .field{ display:grid; gap:.25rem; }
+  .field label{ font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
   .x,.gear{ background:transparent; color:var(--muted); width:32px; height:32px; border-radius:8px; flex:0 0 auto; font-weight:700; }
   .x:hover{ background:var(--pink-soft); color:var(--pink); }
   .gear:hover{ background:var(--surface); color:var(--text); }
+  .item-actions{ display:flex; gap:.25rem; flex:0 0 auto; }
 
-  .week{ display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:var(--s2); }
-  .day-dot{ border:1px solid var(--divider); border-radius:var(--radius); background:var(--surface-2); padding:1rem .4rem; text-align:center; min-height:96px; display:grid; align-content:center; gap:.3rem; }
+  .lower{ display:grid; grid-template-columns:1.45fr 0.9fr; gap:1.25rem; align-items:start; }
+  .week{ display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:.55rem; }
+  .day-dot{ border:1px solid var(--divider); border-radius:var(--radius); background:var(--surface-2); padding:1rem .4rem; text-align:center; min-height:100px; display:grid; align-content:center; gap:.3rem; }
   .day-dot.today{ border-color:var(--primary); box-shadow:0 0 0 2px var(--primary-soft); }
   .day-dot.clean{ background:var(--green-soft); border-color:var(--green); }
   .day-dot.partial{ background:var(--warn-soft); border-color:var(--warn); }
@@ -125,32 +132,36 @@
   .day-dot .d{ font-size:var(--text-xs); font-weight:700; color:var(--muted); text-transform:uppercase; }
   .day-dot .n{ font-size:1.35rem; font-weight:800; font-variant-numeric:tabular-nums; }
   .day-dot .s{ font-size:.65rem; color:var(--faint); font-weight:600; }
-
-  .glance{ display:grid; grid-template-columns:1fr 1fr; gap:var(--s3); }
-  .stat{ border:1px solid var(--divider); border-radius:var(--radius); background:var(--surface-2); padding:.85rem 1rem; }
+  .glance{ display:grid; gap:.75rem; }
+  .stat{ border:1px solid var(--divider); border-radius:var(--radius); background:var(--surface-2); padding:1rem 1.05rem; }
   .stat .k{ font-size:var(--text-xs); text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:700; }
-  .stat .v{ font-size:1.5rem; font-weight:800; font-variant-numeric:tabular-nums; margin-top:.15rem; }
-  .stat .s{ font-size:var(--text-xs); color:var(--faint); margin-top:.2rem; }
+  .stat .v{ font-size:1.55rem; font-weight:800; font-variant-numeric:tabular-nums; margin-top:.15rem; }
+  .stat .s{ font-size:var(--text-xs); color:var(--faint); margin-top:.25rem; }
   .bar{ height:8px; background:var(--bg); border:1px solid var(--divider); border-radius:99px; overflow:hidden; margin-top:.55rem; }
   .bar > i{ display:block; height:100%; border-radius:99px; }
-
   .goals-toggle{ width:100%; text-align:left; }
   .goals-panel{ display:none; margin-top:var(--s3); }
   .goals-panel.open{ display:block; }
-  .goals-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--s2); }
-  .goal-card{ border:1px solid var(--divider); border-radius:var(--radius); background:var(--surface-2); padding:.7rem; display:grid; gap:.35rem; }
+  .goals-grid{ display:grid; grid-template-columns:1fr; gap:.55rem; }
+  .goal-card{ border:1px solid var(--divider); border-radius:var(--radius); background:var(--surface-2); padding:.75rem; display:grid; gap:.35rem; }
   .goal-card label{ font-size:var(--text-xs); font-weight:700; text-transform:uppercase; color:var(--muted); }
   .goal-card input{ text-align:right; }
 
-  @media (max-width:980px){
-    .operate,.lower{ grid-template-columns:1fr; }
-    .shell{ padding:var(--s4); }
+  @media (max-width:1100px){
+    .board{ grid-template-columns:1fr 1fr; }
+    .score{ grid-column:1 / -1; }
+    .score{ grid-template-columns:auto 1fr; align-items:center; column-gap:1.5rem; }
+    .ring-wrap{ margin:0; }
+    .score-copy{ text-align:left; }
+    .pillars{ grid-column:1 / -1; grid-template-columns:repeat(4,minmax(0,1fr)); }
   }
-  @media (max-width:640px){
-    .hero{ grid-template-columns:1fr; justify-items:center; text-align:center; }
-    .pillars,.glance,.goals-grid{ grid-template-columns:1fr 1fr; }
-    .edit-row{ grid-template-columns:1fr 1fr; }
-    .week{ gap:var(--s1); }
+  @media (max-width:820px){
+    .board,.lower,.score{ grid-template-columns:1fr; }
+    .score{ display:grid; }
+    .ring-wrap{ margin:0 auto; }
+    .score-copy{ text-align:center; }
+    .pillars{ grid-template-columns:1fr 1fr; }
+    .shell{ padding:1rem; }
     .topbar{ position:static; }
   }
 </style>
@@ -198,71 +209,82 @@
     <p class="fine">Don’t share this URL — anyone with it can read and change your data. Your checks live in a private sync slot named by the <code>#s=</code> in the address bar.</p>
   </div>
 
-  <div class="operate">
-  <section class="hero" id="hero">
-    <div class="ring-wrap" aria-hidden="true">
-      <svg viewBox="0 0 120 120">
-        <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
-        <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="52" stroke-dasharray="326.73" stroke-dashoffset="326.73"></circle>
-      </svg>
-      <div class="ring-center">
-        <div class="ring-pct" id="ringPct">0%</div>
-        <div class="ring-sub">today</div>
+  <div class="board">
+    <section class="score" id="hero">
+      <div class="ring-wrap" aria-hidden="true">
+        <svg viewBox="0 0 120 120">
+          <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+          <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="52" stroke-dasharray="326.73" stroke-dashoffset="326.73"></circle>
+        </svg>
+        <div class="ring-center">
+          <div class="ring-pct" id="ringPct">0%</div>
+          <div class="ring-sub">today</div>
+        </div>
       </div>
-    </div>
-    <div class="hero-copy">
-      <h2 id="heroHits">0 / 0</h2>
-      <p class="coach" id="coach">One check starts the day.</p>
-      <p class="meta" id="heroMeta"></p>
+      <div class="score-copy">
+        <h2 id="heroHits">0 / 0</h2>
+        <p class="coach" id="coach">One check starts the day.</p>
+        <p class="meta" id="heroMeta"></p>
+      </div>
       <div class="pillars" id="pillars"></div>
-    </div>
-  </section>
+    </section>
 
-  <section class="panel">
-    <div class="panel-head">
-      <div>
-        <h2>Non-negotiables</h2>
-        <p class="muted">Tap the box. That’s the whole move.</p>
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Non-negotiables</h2>
+          <p class="muted">Must hit. Time + pillar on each.</p>
+        </div>
+        <button class="btn sm btn-primary" id="addNnBtn" type="button">Add</button>
       </div>
-      <button class="btn sm btn-primary" id="addNnBtn" type="button">Add</button>
-    </div>
-    <div class="nn-list" id="nnList"></div>
-  </section>
+      <div class="item-list" id="nnList"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>To-dos</h2>
+          <p class="muted">Task, start time, notes.</p>
+        </div>
+        <button class="btn sm btn-primary" id="addTodoBtn" type="button">Add</button>
+      </div>
+      <div class="item-list" id="todoList"></div>
+    </section>
   </div>
 
   <div class="lower">
-  <section class="panel">
-    <div class="panel-head">
-      <div>
-        <h2>This week</h2>
-        <p class="muted" id="weekLabel"></p>
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>This week</h2>
+          <p class="muted" id="weekLabel"></p>
+        </div>
       </div>
-    </div>
-    <div class="week" id="week"></div>
-    <div class="glance" style="margin-top:var(--s4)">
-      <div class="stat">
-        <div class="k">Week</div>
-        <div class="v" id="weekRate">0%</div>
-        <div class="s" id="weekClean">0/7 clean days</div>
-        <div class="bar"><i id="weekBar" style="width:0%;background:var(--primary)"></i></div>
-      </div>
-      <div class="stat">
-        <div class="k">Month</div>
-        <div class="v" id="monthRate">0%</div>
-        <div class="s" id="monthClean">0 clean days</div>
-        <div class="bar"><i id="monthBar" style="width:0%;background:var(--brass)"></i></div>
-      </div>
-    </div>
-  </section>
+      <div class="week" id="week"></div>
+    </section>
 
-  <section class="panel">
-    <button class="btn goals-toggle" id="goalsToggle" type="button">Goals · edit targets ▾</button>
-    <div class="goals-panel" id="goalsPanel">
-      <p class="fine" style="margin-bottom:var(--s3)">Hit-rate % targets. Daily default 100. Weekly 85. Monthly 80.</p>
-      <div class="goals-grid" id="goalsGrid"></div>
-      <button class="btn sm" id="resetGoalsBtn" type="button" style="margin-top:var(--s3)">Reset defaults</button>
-    </div>
-  </section>
+    <section class="panel">
+      <div class="glance">
+        <div class="stat">
+          <div class="k">Week</div>
+          <div class="v" id="weekRate">0%</div>
+          <div class="s" id="weekClean">0/7 clean days</div>
+          <div class="bar"><i id="weekBar" style="width:0%;background:var(--primary)"></i></div>
+        </div>
+        <div class="stat">
+          <div class="k">Month</div>
+          <div class="v" id="monthRate">0%</div>
+          <div class="s" id="monthClean">0 clean days</div>
+          <div class="bar"><i id="monthBar" style="width:0%;background:var(--brass)"></i></div>
+        </div>
+      </div>
+      <button class="btn goals-toggle" id="goalsToggle" type="button">Goals · edit targets ▾</button>
+      <div class="goals-panel" id="goalsPanel">
+        <p class="fine" style="margin-bottom:var(--s3)">Hit-rate % targets. Daily 100 · Weekly 85 · Monthly 80.</p>
+        <div class="goals-grid" id="goalsGrid"></div>
+        <button class="btn sm" id="resetGoalsBtn" type="button" style="margin-top:var(--s3)">Reset defaults</button>
+      </div>
+    </section>
   </div>
 </div>
 
@@ -282,7 +304,7 @@
   ];
   const PLABEL = { health:'Health', discipline:'Discipline', mental:'Mental', physical:'Physical' };
 
-  function uid(){ return 'nn-' + Math.random().toString(36).slice(2,10); }
+  function uid(prefix){ return (prefix||'id') + '-' + Math.random().toString(36).slice(2,10); }
   function num(n){ n = Number(n); return isFinite(n) ? n : 0; }
   function todayISO(){ return new Date().toLocaleDateString('en-CA', { timeZone: TZ }); }
   function nowHM(){ return new Date().toLocaleTimeString('en-GB', { timeZone: TZ, hour:'2-digit', minute:'2-digit', hour12:false }); }
@@ -301,15 +323,16 @@
     { id:'nn-write', name:'Five minutes of writing', pillar:'mental', by:'21:00' },
     { id:'nn-dry', name:'In and dry', pillar:'discipline', by:'22:00' }
   ]; }
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+  function fmtBy(by){
+    if(!by) return '';
+    const [h,m]=by.split(':').map(Number);
+    const am=h<12; const hh=((h+11)%12)+1;
+    return (hh) + ':' + String(m).padStart(2,'0') + (am?' AM':' PM');
+  }
 
-  const state = { theme:'light', nns:seedNns(), days:{}, goals:defaultGoals(), editing:null, updatedAt:0 };
-  let hydrating = true;
-  let syncId = '';
-  let syncBackend = '';
-  let crudItemId = '';
-  let cloudTimer = 0;
-  let pushing = false;
-  let pendingPush = false;
+  const state = { theme:'light', nns:seedNns(), todos:[], days:{}, goals:defaultGoals(), editingNn:null, editingTodo:null, updatedAt:0 };
+  let hydrating = true, syncId = '', syncBackend = '', crudItemId = '', cloudTimer = 0, pushing = false, pendingPush = false;
 
   function dayRec(iso){ if(!state.days[iso]) state.days[iso]={done:{}}; if(!state.days[iso].done) state.days[iso].done={}; return state.days[iso]; }
   function isDone(iso,id){ return !!(state.days[iso] && state.days[iso].done && state.days[iso].done[id]); }
@@ -342,20 +365,14 @@
     if(iso > todayISO() || !nn.by) return false;
     return nowHM() > nn.by;
   }
-  function fmtBy(by){
-    if(!by) return '';
-    const [h,m]=by.split(':').map(Number);
-    const am=h<12; const hh=((h+11)%12)+1;
-    return 'by ' + hh + ':' + String(m).padStart(2,'0') + (am?' AM':' PM');
-  }
-  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
   function serialize(){
     return {
-      version:1,
+      version:2,
       updatedAt: state.updatedAt || Date.now(),
       theme: document.documentElement.getAttribute('data-theme') || 'light',
       nns: state.nns,
+      todos: state.todos,
       days: state.days,
       goals: state.goals
     };
@@ -363,6 +380,9 @@
   function applyPayload(p){
     if(!p || typeof p !== 'object') return;
     if(p.nns && Array.isArray(p.nns) && p.nns.length) state.nns = p.nns;
+    if(Array.isArray(p.todos)) state.todos = p.todos.map(function(t){
+      return { id:t.id||uid('todo'), text:String(t.text||''), start:t.start||'', notes:String(t.notes||''), done:!!t.done };
+    });
     if(p.days && typeof p.days === 'object') state.days = p.days;
     if(p.goals) state.goals = Object.assign(defaultGoals(), p.goals);
     if(p.updatedAt) state.updatedAt = num(p.updatedAt);
@@ -372,7 +392,7 @@
     }
   }
   function isHumanPayload(p){
-    return !!(p && typeof p === 'object' && !Array.isArray(p) && (p.version != null || p.nns || p.days || p.goals));
+    return !!(p && typeof p === 'object' && !Array.isArray(p) && (p.version != null || p.nns || p.days || p.goals || p.todos));
   }
   function stripMeta(p){
     if(!p || typeof p !== 'object' || Array.isArray(p)) return p;
@@ -381,7 +401,6 @@
     return out;
   }
   function touch(){ state.updatedAt = Date.now(); }
-
   function persistLocal(){
     try{ localStorage.setItem(STORAGE, JSON.stringify(serialize())); flash('Saved'); }
     catch(e){ flash('Fail'); }
@@ -434,34 +453,21 @@
   async function fetchJSON(url, opts){
     const r = await fetch(url, opts);
     const ct = (r.headers.get('content-type') || '').toLowerCase();
-    if(!r.ok){
-      const err = new Error('http ' + r.status);
-      err.status = r.status;
-      throw err;
-    }
+    if(!r.ok){ const err = new Error('http ' + r.status); err.status = r.status; throw err; }
     if(r.status === 204) return null;
-    if(!ct.includes('json')){
-      const err = new Error('not-json');
-      err.status = r.status;
-      throw err;
-    }
+    if(!ct.includes('json')){ const err = new Error('not-json'); err.status = r.status; throw err; }
     const text = await r.text();
     if(!text) return null;
     return JSON.parse(text);
   }
   async function jbCreate(payload){
-    const r = await fetch(JB_API, {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', 'Accept':'application/json' },
-      body: JSON.stringify(payload)
-    });
+    const r = await fetch(JB_API, { method:'POST', headers:{ 'Content-Type':'application/json', 'Accept':'application/json' }, body: JSON.stringify(payload) });
     const ct = (r.headers.get('content-type') || '').toLowerCase();
     if(!r.ok || !ct.includes('json')) throw Object.assign(new Error('jsonblob-create'), {status:r.status});
     const loc = r.headers.get('Location') || r.headers.get('X-jsonblob-id') || r.headers.get('x-jsonblob-id') || '';
     const id = String(loc).split('/').filter(Boolean).pop();
     if(!id) throw new Error('jsonblob-no-id');
-    syncBackend = 'jsonblob';
-    crudItemId = '';
+    syncBackend = 'jsonblob'; crudItemId = '';
     return id;
   }
   async function jbGet(id){
@@ -469,11 +475,7 @@
     return isHumanPayload(data) ? stripMeta(data) : null;
   }
   async function jbPut(id, payload){
-    await fetchJSON(JB_API + '/' + encodeURIComponent(id), {
-      method:'PUT',
-      headers:{ 'Content-Type':'application/json', 'Accept':'application/json' },
-      body: JSON.stringify(payload)
-    });
+    await fetchJSON(JB_API + '/' + encodeURIComponent(id), { method:'PUT', headers:{ 'Content-Type':'application/json', 'Accept':'application/json' }, body: JSON.stringify(payload) });
     syncBackend = 'jsonblob';
   }
   async function crudGet(id){
@@ -487,81 +489,49 @@
     return stripMeta(items[0]);
   }
   async function crudCreate(id, payload){
-    const data = await fetchJSON(CRUD_API + '/' + encodeURIComponent(id), {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', 'Accept':'application/json' },
-      body: JSON.stringify(payload)
-    });
+    const data = await fetchJSON(CRUD_API + '/' + encodeURIComponent(id), { method:'POST', headers:{ 'Content-Type':'application/json', 'Accept':'application/json' }, body: JSON.stringify(payload) });
     crudItemId = data && data._id ? data._id : '';
     syncBackend = 'crudcrud';
     return id;
   }
   async function crudPut(id, payload){
     if(!crudItemId){ await crudCreate(id, payload); return; }
-    const r = await fetch(CRUD_API + '/' + encodeURIComponent(id) + '/' + encodeURIComponent(crudItemId), {
-      method:'PUT',
-      headers:{ 'Content-Type':'application/json', 'Accept':'application/json' },
-      body: JSON.stringify(payload)
-    });
+    const r = await fetch(CRUD_API + '/' + encodeURIComponent(id) + '/' + encodeURIComponent(crudItemId), { method:'PUT', headers:{ 'Content-Type':'application/json', 'Accept':'application/json' }, body: JSON.stringify(payload) });
     if(r.status === 404){ crudItemId = ''; await crudCreate(id, payload); return; }
     if(!r.ok) throw Object.assign(new Error('crud-put'), {status:r.status});
     syncBackend = 'crudcrud';
   }
   async function pullRemote(id){
-    if(syncBackend === 'crudcrud'){
-      try{ const d = await crudGet(id); if(d) return d; }catch(e){}
-    }
-    try{
-      const d = await jbGet(id);
-      if(d){ syncBackend = 'jsonblob'; return d; }
-    }catch(e){}
-    try{
-      const d = await crudGet(id);
-      if(d) return d;
-    }catch(e){}
+    if(syncBackend === 'crudcrud'){ try{ const d = await crudGet(id); if(d) return d; }catch(e){} }
+    try{ const d = await jbGet(id); if(d){ syncBackend = 'jsonblob'; return d; } }catch(e){}
+    try{ const d = await crudGet(id); if(d) return d; }catch(e){}
     return null;
   }
   async function createRemote(payload){
     try{ return await jbCreate(payload); }
-    catch(e){
-      const id = newSyncId();
-      await crudCreate(id, payload);
-      return id;
-    }
+    catch(e){ const id = newSyncId(); await crudCreate(id, payload); return id; }
   }
   async function pushRemote(id, payload){
     const body = stripMeta(payload);
-    if(syncBackend === 'jsonblob'){
-      try{ await jbPut(id, body); return; }catch(e){}
-    }
+    if(syncBackend === 'jsonblob'){ try{ await jbPut(id, body); return; }catch(e){} }
     if(syncBackend === 'crudcrud'){ await crudPut(id, body); return; }
     try{ await jbPut(id, body); return; }catch(e){}
     await crudPut(id, body);
   }
-  function scheduleCloudSave(){
-    clearTimeout(cloudTimer);
-    cloudTimer = setTimeout(pushNow, 550);
-  }
+  function scheduleCloudSave(){ clearTimeout(cloudTimer); cloudTimer = setTimeout(pushNow, 550); }
   async function pushNow(){
     if(!navigator.onLine){ setSyncStatus('Offline', 'offline'); return; }
     if(!syncId) return;
     if(pushing){ pendingPush = true; return; }
-    pushing = true;
-    setSyncStatus('Saving…', '');
-    try{
-      await pushRemote(syncId, serialize());
-      setSyncStatus('Synced', 'ok');
-    }catch(e){
-      setSyncStatus('Sync failed', 'failed');
-    }
+    pushing = true; setSyncStatus('Saving…', '');
+    try{ await pushRemote(syncId, serialize()); setSyncStatus('Synced', 'ok'); }
+    catch(e){ setSyncStatus('Sync failed', 'failed'); }
     pushing = false;
     if(pendingPush){ pendingPush = false; scheduleCloudSave(); }
   }
   async function initSync(){
     let id = parseHash();
-    if(!id){
-      try{ id = localStorage.getItem(SYNC_ID_KEY) || ''; }catch(e){ id = ''; }
-    }
+    if(!id){ try{ id = localStorage.getItem(SYNC_ID_KEY) || ''; }catch(e){ id = ''; } }
     if(id){
       setHash(id);
       if(!navigator.onLine){ setSyncStatus('Offline', 'offline'); hydrating = false; return; }
@@ -571,19 +541,14 @@
         const localTs = state.updatedAt || 0;
         const remoteTs = remote ? num(remote.updatedAt) : 0;
         if(remote && remoteTs > localTs){
-          hydrating = true;
-          applyPayload(remote);
+          hydrating = true; applyPayload(remote);
           try{ localStorage.setItem(STORAGE, JSON.stringify(serialize())); }catch(e){}
-          render();
-          hydrating = false;
+          render(); hydrating = false;
         } else if(!remote || localTs > remoteTs){
-          hydrating = false;
-          await pushRemote(id, serialize());
+          hydrating = false; await pushRemote(id, serialize());
         }
         setSyncStatus('Synced', 'ok');
-      }catch(e){
-        setSyncStatus(navigator.onLine ? 'Sync failed' : 'Offline', navigator.onLine ? 'failed' : 'offline');
-      }
+      }catch(e){ setSyncStatus(navigator.onLine ? 'Sync failed' : 'Offline', navigator.onLine ? 'failed' : 'offline'); }
     } else {
       if(!navigator.onLine){ setSyncStatus('Offline', 'offline'); hydrating = false; return; }
       setSyncStatus('Creating sync…', '');
@@ -592,9 +557,7 @@
         const newId = await createRemote(serialize());
         setHash(newId);
         setSyncStatus('Synced — bookmark this link', 'ok');
-      }catch(e){
-        setSyncStatus('Sync failed', 'failed');
-      }
+      }catch(e){ setSyncStatus('Sync failed', 'failed'); }
     }
     hydrating = false;
   }
@@ -622,33 +585,61 @@
     document.getElementById('topDate').textContent = fmtLong(iso);
     document.getElementById('pillars').innerHTML = PILLARS.map(function(pl){
       const r=s[pl.key];
-      return '<div class="pillar '+pl.key+'"><div class="k">'+pl.label+'</div><div class="v">'+(r.tot? r.hit+'/'+r.tot : '—')+'</div></div>';
+      return '<div class="pillar '+pl.key+'"><div class="k">'+pl.label+'</div><div class="v">'+r.hit+'/'+r.tot+'</div></div>';
     }).join('');
   }
 
-  function renderList(iso){
+  function renderNns(iso){
     const box=document.getElementById('nnList');
     if(!state.nns.length){ box.innerHTML='<p class="muted">No non-negotiables yet.</p>'; return; }
     box.innerHTML = state.nns.map(function(n){
       const on=isDone(iso,n.id);
       const late=isLate(n,iso);
-      const editing=state.editing===n.id;
+      const editing=state.editingNn===n.id;
       const opts=PILLARS.map(function(p){ return '<option value="'+p.key+'"'+(n.pillar===p.key?' selected':'')+'>'+p.label+'</option>'; }).join('');
-      return '<div class="nn'+(on?' done':'')+(late?' late':'')+(editing?' editing':'')+'" data-id="'+n.id+'">'+
-        '<div class="nn-row">'+
+      return '<div class="item'+(on?' done':'')+(late?' late':'')+(editing?' editing':'')+'" data-kind="nn" data-id="'+n.id+'">'+
+        '<div class="item-row">'+
           '<button class="check'+(on?' on':'')+'" type="button" data-act="toggle" aria-label="Mark done">'+(on?'✓':'')+'</button>'+
-          '<div class="nn-body">'+
-            '<div class="nn-name'+(on?' done':'')+'">'+(n.name||'Untitled')+'</div>'+
-            '<div class="nn-meta"><span class="chip '+n.pillar+'">'+PLABEL[n.pillar]+'</span><span>'+fmtBy(n.by)+'</span>'+(late&&!on?'<span class="chip late">late</span>':'')+'</div>'+
+          '<div class="item-body">'+
+            '<div class="item-name view-only'+(on?' done':'')+'">'+(n.name||'Untitled')+'</div>'+
+            '<div class="item-meta view-only"><span class="chip '+n.pillar+'">'+PLABEL[n.pillar]+'</span><span>by '+fmtBy(n.by)+'</span>'+(late&&!on?'<span class="chip late">late</span>':'')+'</div>'+
           '</div>'+
-          '<button class="gear" type="button" data-act="edit" aria-label="Edit">✎</button>'+
-          '<button class="x" type="button" data-act="del" aria-label="Delete">×</button>'+
+          '<div class="item-actions"><button class="gear" type="button" data-act="edit" aria-label="Edit">✎</button><button class="x" type="button" data-act="del" aria-label="Delete">×</button></div>'+
         '</div>'+
-        '<div class="edit-row">'+
-          '<input type="text" data-field="name" value="'+esc(n.name)+'" placeholder="Non-negotiable" />'+
-          '<select data-field="pillar">'+opts+'</select>'+
-          '<input type="time" data-field="by" value="'+esc(n.by||'')+'" />'+
-          '<button class="btn sm" type="button" data-act="done-edit">Done</button>'+
+        '<div class="edit-grid">'+
+          '<div class="field" style="grid-column:1/-1"><label>Task</label><input type="text" data-field="name" value="'+esc(n.name)+'" placeholder="Non-negotiable" /></div>'+
+          '<div class="field"><label>Pillar</label><select data-field="pillar">'+opts+'</select></div>'+
+          '<div class="field"><label>By</label><input type="time" data-field="by" value="'+esc(n.by||'')+'" /></div>'+
+          '<button class="btn sm" type="button" data-act="done-edit" style="grid-column:1/-1">Done</button>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+
+  function renderTodos(){
+    const box=document.getElementById('todoList');
+    if(!state.todos.length){ box.innerHTML='<p class="muted">No to-dos yet. Add the next move.</p>'; return; }
+    const sorted = state.todos.slice().sort(function(a,b){
+      if(a.done !== b.done) return a.done ? 1 : -1;
+      return String(a.start||'99:99').localeCompare(String(b.start||'99:99'));
+    });
+    box.innerHTML = sorted.map(function(t){
+      const editing=state.editingTodo===t.id;
+      return '<div class="item'+(t.done?' done':'')+(editing?' editing':'')+'" data-kind="todo" data-id="'+t.id+'">'+
+        '<div class="item-row">'+
+          '<button class="check'+(t.done?' on':'')+'" type="button" data-act="toggle" aria-label="Mark done">'+(t.done?'✓':'')+'</button>'+
+          '<div class="item-body">'+
+            '<div class="item-name view-only'+(t.done?' done':'')+'">'+(t.text||'Untitled')+'</div>'+
+            '<div class="item-meta view-only">'+(t.start?'<span>start '+fmtBy(t.start)+'</span>':'<span>no start time</span>')+'</div>'+
+            (t.notes && !editing ? '<div class="notes-line view-only">'+esc(t.notes)+'</div>' : '')+
+          '</div>'+
+          '<div class="item-actions"><button class="gear" type="button" data-act="edit" aria-label="Edit">✎</button><button class="x" type="button" data-act="del" aria-label="Delete">×</button></div>'+
+        '</div>'+
+        '<div class="edit-grid">'+
+          '<div class="field" style="grid-column:1/-1"><label>Task</label><input type="text" data-field="text" value="'+esc(t.text)+'" placeholder="Task" /></div>'+
+          '<div class="field"><label>Start</label><input type="time" data-field="start" value="'+esc(t.start||'')+'" /></div>'+
+          '<div class="field" style="grid-column:1/-1"><label>Notes</label><textarea data-field="notes" placeholder="Notes">'+esc(t.notes)+'</textarea></div>'+
+          '<button class="btn sm" type="button" data-act="done-edit" style="grid-column:1/-1">Done</button>'+
         '</div>'+
       '</div>';
     }).join('');
@@ -690,11 +681,14 @@
 
   function render(){
     const iso=todayISO();
-    renderHero(iso); renderList(iso); renderWeek(iso); renderGoals();
+    renderHero(iso); renderNns(iso); renderTodos(); renderWeek(iso); renderGoals();
   }
 
+  function findNn(id){ return state.nns.find(function(n){ return n.id===id; }); }
+  function findTodo(id){ return state.todos.find(function(t){ return t.id===id; }); }
+
   document.getElementById('nnList').addEventListener('click', function(e){
-    const row=e.target.closest('.nn'); if(!row) return;
+    const row=e.target.closest('.item'); if(!row) return;
     const id=row.getAttribute('data-id');
     const act=e.target.getAttribute('data-act');
     const iso=todayISO();
@@ -703,34 +697,66 @@
       if(rec.done[id]) delete rec.done[id]; else rec.done[id]=true;
       persist(); render(); return;
     }
-    if(act==='edit'){ state.editing = state.editing===id ? null : id; render(); return; }
-    if(act==='done-edit'){ state.editing=null; persist(); render(); return; }
+    if(act==='edit'){ state.editingNn = state.editingNn===id ? null : id; render(); return; }
+    if(act==='done-edit'){ state.editingNn=null; persist(); render(); return; }
     if(act==='del'){
       if(state.nns.length<=1){ flash('Keep 1'); return; }
       state.nns=state.nns.filter(function(n){ return n.id!==id; });
-      if(state.editing===id) state.editing=null;
+      if(state.editingNn===id) state.editingNn=null;
       persist(); render();
     }
   });
   document.getElementById('nnList').addEventListener('change', function(e){
-    const row=e.target.closest('.nn'); if(!row) return;
-    const nn=state.nns.find(function(n){ return n.id===row.getAttribute('data-id'); });
-    if(!nn) return;
+    const row=e.target.closest('.item'); if(!row) return;
+    const nn=findNn(row.getAttribute('data-id')); if(!nn) return;
     const f=e.target.getAttribute('data-field'); if(!f) return;
     nn[f]=e.target.value; persist();
     if(f!=='name') render();
   });
   document.getElementById('nnList').addEventListener('input', function(e){
-    const row=e.target.closest('.nn'); if(!row) return;
-    const nn=state.nns.find(function(n){ return n.id===row.getAttribute('data-id'); });
+    const row=e.target.closest('.item'); if(!row) return;
+    const nn=findNn(row.getAttribute('data-id'));
     if(nn && e.target.getAttribute('data-field')==='name') nn.name=e.target.value;
+  });
+
+  document.getElementById('todoList').addEventListener('click', function(e){
+    const row=e.target.closest('.item'); if(!row) return;
+    const id=row.getAttribute('data-id');
+    const act=e.target.getAttribute('data-act');
+    const todo=findTodo(id); if(!todo) return;
+    if(act==='toggle'){ todo.done=!todo.done; persist(); render(); return; }
+    if(act==='edit'){ state.editingTodo = state.editingTodo===id ? null : id; render(); return; }
+    if(act==='done-edit'){ state.editingTodo=null; persist(); render(); return; }
+    if(act==='del'){
+      state.todos=state.todos.filter(function(t){ return t.id!==id; });
+      if(state.editingTodo===id) state.editingTodo=null;
+      persist(); render();
+    }
+  });
+  document.getElementById('todoList').addEventListener('change', function(e){
+    const row=e.target.closest('.item'); if(!row) return;
+    const todo=findTodo(row.getAttribute('data-id')); if(!todo) return;
+    const f=e.target.getAttribute('data-field'); if(!f) return;
+    todo[f]=e.target.value; persist();
+    if(f==='start') render();
+  });
+  document.getElementById('todoList').addEventListener('input', function(e){
+    const row=e.target.closest('.item'); if(!row) return;
+    const todo=findTodo(row.getAttribute('data-id')); if(!todo) return;
+    const f=e.target.getAttribute('data-field');
+    if(f==='text' || f==='notes') todo[f]=e.target.value;
   });
 
   document.getElementById('addNnBtn').addEventListener('click', function(){
     if(state.nns.length>=7){ flash('Max 7'); return; }
-    const id=uid();
+    const id=uid('nn');
     state.nns.push({ id:id, name:'', pillar:'health', by:'20:00' });
-    state.editing=id; persist(); render();
+    state.editingNn=id; persist(); render();
+  });
+  document.getElementById('addTodoBtn').addEventListener('click', function(){
+    const id=uid('todo');
+    state.todos.push({ id:id, text:'', start:'', notes:'', done:false });
+    state.editingTodo=id; persist(); render();
   });
 
   document.getElementById('goalsToggle').addEventListener('click', function(){
