@@ -292,8 +292,14 @@
 (function(){
   const STORAGE = 'the-human-v1';
   const SYNC_ID_KEY = 'the-human-sync-id';
-  const JB_API = 'https://jsonblob.com/api/jsonBlob';
-  const CRUD_API = 'https://crudcrud.com/api/85bfb05a311f4a7db2b7cb9efc25935e/the-human';
+  // Sync store: textdb.dev (free, no account, no expiry, open CORS). Key = cgv-the-human-<sync id>.
+  const KV_API = 'https://textdb.dev/api/data/';
+  const KV_PREFIX = 'cgv-the-human-';
+  const KV_MAX = 256000;
+  const LEGACY_JB = 'https://jsonblob.com/api/jsonBlob/';
+  const MERGE_ARRAYS = ['todos'];
+  const MERGE_MAPS = ['days'];
+  const BASE_KEY = STORAGE + '-syncbase';
   const TZ = 'America/New_York';
   const CIRC = 2 * Math.PI * 52;
   const PILLARS = [
@@ -332,7 +338,7 @@
   }
 
   const state = { theme:'light', nns:seedNns(), todos:[], days:{}, goals:defaultGoals(), editingNn:null, editingTodo:null, updatedAt:0 };
-  let hydrating = true, syncId = '', syncBackend = '', crudItemId = '', cloudTimer = 0, pushing = false, pendingPush = false;
+  let hydrating = true, syncId = '', cloudTimer = 0, pushing = false, pendingPush = false;
 
   function dayRec(iso){ if(!state.days[iso]) state.days[iso]={done:{}}; if(!state.days[iso].done) state.days[iso].done={}; return state.days[iso]; }
   function isDone(iso,id){ return !!(state.days[iso] && state.days[iso].done && state.days[iso].done[id]); }
@@ -369,7 +375,7 @@
   function serialize(){
     return {
       version:2,
-      updatedAt: state.updatedAt || Date.now(),
+      updatedAt: state.updatedAt || 0,
       theme: document.documentElement.getAttribute('data-theme') || 'light',
       nns: state.nns,
       todos: state.todos,
@@ -450,115 +456,103 @@
     const btn = document.getElementById('reconnectBtn');
     if(btn) btn.hidden = !(cls === 'failed' || cls === 'offline');
   }
-  async function fetchJSON(url, opts){
-    const r = await fetch(url, opts);
-    const ct = (r.headers.get('content-type') || '').toLowerCase();
-    if(!r.ok){ const err = new Error('http ' + r.status); err.status = r.status; throw err; }
-    if(r.status === 204) return null;
-    if(!ct.includes('json')){ const err = new Error('not-json'); err.status = r.status; throw err; }
-    const text = await r.text();
-    if(!text) return null;
-    return JSON.parse(text);
+  function validId(id){ return /^[A-Za-z0-9_-]{8,64}$/.test(String(id||'')); }
+  function kvUrl(id){ return KV_API + KV_PREFIX + id; }
+  async function kvGet(id){
+    if(!validId(id)) throw new Error('bad-id');
+    const r = await fetch(kvUrl(id), { cache:'no-store' });
+    if(!r.ok) throw Object.assign(new Error('kv-get'), {status:r.status});
+    const t = (await r.text()).trim();
+    if(!t) return null;
+    let d; try{ d = JSON.parse(t); }catch(e){ return null; }
+    return isHumanPayload(d) ? stripMeta(d) : null;
   }
-  async function jbCreate(payload){
-    const r = await fetch(JB_API, { method:'POST', headers:{ 'Content-Type':'application/json', 'Accept':'application/json' }, body: JSON.stringify(payload) });
-    const ct = (r.headers.get('content-type') || '').toLowerCase();
-    if(!r.ok || !ct.includes('json')) throw Object.assign(new Error('jsonblob-create'), {status:r.status});
-    const loc = r.headers.get('Location') || r.headers.get('X-jsonblob-id') || r.headers.get('x-jsonblob-id') || '';
-    const id = String(loc).split('/').filter(Boolean).pop();
-    if(!id) throw new Error('jsonblob-no-id');
-    syncBackend = 'jsonblob'; crudItemId = '';
-    return id;
+  async function kvPut(id, payload){
+    if(!validId(id)) throw new Error('bad-id');
+    const body = JSON.stringify(stripMeta(payload));
+    if(body.length > KV_MAX) throw new Error('too-big');
+    // text/plain = CORS "simple" request, no preflight
+    const r = await fetch(kvUrl(id), { method:'POST', headers:{ 'Content-Type':'text/plain' }, body: body });
+    if(!r.ok) throw Object.assign(new Error('kv-put'), {status:r.status});
   }
-  async function jbGet(id){
-    const data = await fetchJSON(JB_API + '/' + encodeURIComponent(id), { headers:{ 'Accept':'application/json' } });
-    return isHumanPayload(data) ? stripMeta(data) : null;
+  async function legacyGet(id){
+    try{ const r = await fetch(LEGACY_JB + encodeURIComponent(id), { headers:{ 'Accept':'application/json' } });
+      if(!r.ok) return null; const d = await r.json(); return isHumanPayload(d) ? stripMeta(d) : null; }catch(e){ return null; }
   }
-  async function jbPut(id, payload){
-    await fetchJSON(JB_API + '/' + encodeURIComponent(id), { method:'PUT', headers:{ 'Content-Type':'application/json', 'Accept':'application/json' }, body: JSON.stringify(payload) });
-    syncBackend = 'jsonblob';
+  function loadBase(){ try{ const b = JSON.parse(localStorage.getItem(BASE_KEY) || 'null'); return (b && b.id === syncId) ? b : null; }catch(e){ return null; } }
+  function saveBase(p){
+    const b = { id: syncId };
+    MERGE_ARRAYS.forEach(function(f){ b[f] = (Array.isArray(p[f]) ? p[f] : []).map(function(x){ return x && x.id; }).filter(Boolean); });
+    MERGE_MAPS.forEach(function(f){ b[f] = Object.keys((p[f] && typeof p[f] === 'object') ? p[f] : {}); });
+    try{ localStorage.setItem(BASE_KEY, JSON.stringify(b)); }catch(e){}
   }
-  async function crudGet(id){
-    const data = await fetchJSON(CRUD_API + '/' + encodeURIComponent(id), { headers:{ 'Accept':'application/json' } });
-    const arr = Array.isArray(data) ? data : (data ? [data] : []);
-    const items = arr.filter(isHumanPayload);
-    if(!items.length) return null;
-    items.sort(function(a,b){ return num(b.updatedAt) - num(a.updatedAt); });
-    crudItemId = items[0]._id || crudItemId;
-    syncBackend = 'crudcrud';
-    return stripMeta(items[0]);
-  }
-  async function crudCreate(id, payload){
-    const data = await fetchJSON(CRUD_API + '/' + encodeURIComponent(id), { method:'POST', headers:{ 'Content-Type':'application/json', 'Accept':'application/json' }, body: JSON.stringify(payload) });
-    crudItemId = data && data._id ? data._id : '';
-    syncBackend = 'crudcrud';
-    return id;
-  }
-  async function crudPut(id, payload){
-    if(!crudItemId){ await crudCreate(id, payload); return; }
-    const r = await fetch(CRUD_API + '/' + encodeURIComponent(id) + '/' + encodeURIComponent(crudItemId), { method:'PUT', headers:{ 'Content-Type':'application/json', 'Accept':'application/json' }, body: JSON.stringify(payload) });
-    if(r.status === 404){ crudItemId = ''; await crudCreate(id, payload); return; }
-    if(!r.ok) throw Object.assign(new Error('crud-put'), {status:r.status});
-    syncBackend = 'crudcrud';
-  }
-  async function pullRemote(id){
-    if(syncBackend === 'crudcrud'){ try{ const d = await crudGet(id); if(d) return d; }catch(e){} }
-    try{ const d = await jbGet(id); if(d){ syncBackend = 'jsonblob'; return d; } }catch(e){}
-    try{ const d = await crudGet(id); if(d) return d; }catch(e){}
-    return null;
-  }
-  async function createRemote(payload){
-    try{ return await jbCreate(payload); }
-    catch(e){ const id = newSyncId(); await crudCreate(id, payload); return id; }
-  }
-  async function pushRemote(id, payload){
-    const body = stripMeta(payload);
-    if(syncBackend === 'jsonblob'){ try{ await jbPut(id, body); return; }catch(e){} }
-    if(syncBackend === 'crudcrud'){ await crudPut(id, body); return; }
-    try{ await jbPut(id, body); return; }catch(e){}
-    await crudPut(id, body);
+  // 3-way merge: items on both sides -> newer doc wins; one side only -> kept if new, dropped if it existed at last sync (deleted on the other side).
+  function mergePayloads(L, R, base){
+    const lt = num(L.updatedAt), rt = num(R.updatedAt), rNewer = rt > lt;
+    const out = Object.assign({}, rNewer ? R : L);
+    MERGE_ARRAYS.forEach(function(f){
+      const la = Array.isArray(L[f]) ? L[f] : [], ra = Array.isArray(R[f]) ? R[f] : [];
+      const b = new Set((base && base[f]) || []);
+      const lm = new Map(), rm = new Map();
+      la.forEach(function(x){ if(x && x.id) lm.set(x.id, x); }); ra.forEach(function(x){ if(x && x.id) rm.set(x.id, x); });
+      const res = [];
+      la.forEach(function(x){ if(!x || !x.id){ if(!rNewer) res.push(x); return; } if(rm.has(x.id)) res.push(rNewer ? rm.get(x.id) : x); else if(!b.has(x.id)) res.push(x); });
+      ra.forEach(function(x){ if(!x || !x.id){ if(rNewer) res.push(x); return; } if(!lm.has(x.id) && !b.has(x.id)) res.push(x); });
+      out[f] = res;
+    });
+    MERGE_MAPS.forEach(function(f){
+      const lo = (L[f] && typeof L[f] === 'object') ? L[f] : {}, ro = (R[f] && typeof R[f] === 'object') ? R[f] : {};
+      const b = new Set((base && base[f]) || []); const res = {};
+      Object.keys(lo).forEach(function(k){ if(k in ro) res[k] = rNewer ? ro[k] : lo[k]; else if(!b.has(k)) res[k] = lo[k]; });
+      Object.keys(ro).forEach(function(k){ if(!(k in lo) && !b.has(k)) res[k] = ro[k]; });
+      out[f] = res;
+    });
+    out.updatedAt = Math.max(lt, rt);
+    return out;
   }
   function scheduleCloudSave(){ clearTimeout(cloudTimer); cloudTimer = setTimeout(pushNow, 550); }
-  async function pushNow(){
-    if(!navigator.onLine){ setSyncStatus('Offline', 'offline'); return; }
+  async function pushNow(){ return syncNow(); }
+  async function syncNow(){
     if(!syncId) return;
+    if(!navigator.onLine){ setSyncStatus('Offline', 'offline'); return; }
     if(pushing){ pendingPush = true; return; }
-    pushing = true; setSyncStatus('Saving…', '');
-    try{ await pushRemote(syncId, serialize()); setSyncStatus('Synced', 'ok'); }
-    catch(e){ setSyncStatus('Sync failed', 'failed'); }
+    pushing = true; setSyncStatus('Syncing…', '');
+    try{
+      const base = loadBase();
+      let remote = await kvGet(syncId);
+      if(!remote && !base) remote = await legacyGet(syncId);   // one-time migration from old jsonblob slot
+      const local = serialize();
+      let out = local;
+      if(remote){
+        out = mergePayloads(local, remote, base);
+        const outS = JSON.stringify(out);
+        if(outS !== JSON.stringify(local)){
+          hydrating = true; applyPayload(out);
+          try{ localStorage.setItem(STORAGE, JSON.stringify(serialize())); }catch(e){}
+          render(); hydrating = false;
+        }
+        if(outS !== JSON.stringify(remote)){
+          if(num(out.updatedAt) <= num(remote.updatedAt)){ out.updatedAt = Date.now(); state.updatedAt = out.updatedAt; try{ localStorage.setItem(STORAGE, JSON.stringify(serialize())); }catch(e){} }
+          await kvPut(syncId, out);
+        }
+      } else {
+        // remote empty: push local up (never overwrite local with empty remote)
+        // pristine local keeps updatedAt 0 so it can never outrank real data from another device
+        await kvPut(syncId, local);
+      }
+      saveBase(out);
+      setSyncStatus('Synced', 'ok');
+    }catch(e){ setSyncStatus(navigator.onLine ? (e && e.message === 'too-big' ? 'Sync failed: data too big' : 'Sync failed') : 'Offline', navigator.onLine ? 'failed' : 'offline'); }
     pushing = false;
     if(pendingPush){ pendingPush = false; scheduleCloudSave(); }
   }
   async function initSync(){
     let id = parseHash();
     if(!id){ try{ id = localStorage.getItem(SYNC_ID_KEY) || ''; }catch(e){ id = ''; } }
-    if(id){
-      setHash(id);
-      if(!navigator.onLine){ setSyncStatus('Offline', 'offline'); hydrating = false; return; }
-      setSyncStatus('Syncing…', '');
-      try{
-        const remote = await pullRemote(id);
-        const localTs = state.updatedAt || 0;
-        const remoteTs = remote ? num(remote.updatedAt) : 0;
-        if(remote && remoteTs > localTs){
-          hydrating = true; applyPayload(remote);
-          try{ localStorage.setItem(STORAGE, JSON.stringify(serialize())); }catch(e){}
-          render(); hydrating = false;
-        } else if(!remote || localTs > remoteTs){
-          hydrating = false; await pushRemote(id, serialize());
-        }
-        setSyncStatus('Synced', 'ok');
-      }catch(e){ setSyncStatus(navigator.onLine ? 'Sync failed' : 'Offline', navigator.onLine ? 'failed' : 'offline'); }
-    } else {
-      if(!navigator.onLine){ setSyncStatus('Offline', 'offline'); hydrating = false; return; }
-      setSyncStatus('Creating sync…', '');
-      try{
-        if(!state.updatedAt) state.updatedAt = Date.now();
-        const newId = await createRemote(serialize());
-        setHash(newId);
-        setSyncStatus('Synced — bookmark this link', 'ok');
-      }catch(e){ setSyncStatus('Sync failed', 'failed'); }
-    }
+    if(!validId(id)) id = newSyncId();
+    setHash(id);
+    pushing = false;
+    await syncNow();
     hydrating = false;
   }
 
@@ -793,6 +787,8 @@
   loadLocal();
   render();
   initSync();
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') syncNow(); });
+  setInterval(function(){ if(document.visibilityState === 'visible') syncNow(); }, 45000);
   window.addEventListener('online', function(){ setSyncStatus('Syncing…', ''); if(syncId) pushNow(); else initSync(); });
   window.addEventListener('offline', function(){ setSyncStatus('Offline', 'offline'); });
   window.addEventListener('hashchange', function(){
